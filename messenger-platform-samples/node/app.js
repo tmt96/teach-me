@@ -427,7 +427,7 @@ function sendGifMessage(recipientId) {
       }
     }
   };
-
+  sendTextMessage(recipientId, 'Congras. Your level is up. And now is: ' + user.getLevel());
   callSendAPI(messageData);
 }
 

@@ -1,4 +1,4 @@
-var LEVEL_UP_VALUE = 3;
+var LEVEL_UP_VALUE = 10;
 var User = function()
 {
     this.lastUpdated = new Date();
