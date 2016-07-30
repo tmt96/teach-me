@@ -258,11 +258,11 @@ function receivedMessage(event) {
         break;
       case 'start review':
         if (reviewOn) sendTextMessage(senderID, 'You are already in review mode.');
-        else turnOnReview();
+        else turnOnReview(senderID);
         break;
       case 'stop review':
         if (!reviewOn) sendTextMessage(senderID, 'You are not in review mode.');
-        else turnOffReview();
+        else turnOffReview(senderID);
         break;
       default:
         translateAndSend(senderID, messageText);
@@ -316,11 +316,11 @@ function receivedPostback(event) {
   var payload = event.postback.payload;
   switch (payload) {
       case '/help':
-          sendHelp()
+          sendHelp(senderID);
           break;
       case '/review_switch':
-          if (reviewOn) turnOffReview();
-          else turnOnReview();
+          if (reviewOn) turnOffReview(senderID);
+          else turnOnReview(senderID);
       default:
           break;
   }
