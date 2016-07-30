@@ -386,7 +386,7 @@ function receivedAccountLink(event) {
  * Send an image using the Send API.
  *
  */
-function sendImageMessage(recipientId) {
+function sendImageMessage(recipientId,linking) {
   var messageData = {
     recipient: {
       id: recipientId
@@ -395,7 +395,7 @@ function sendImageMessage(recipientId) {
       attachment: {
         type: "image",
         payload: {
-          url: SERVER_URL + "/assets/rift.png"
+          url: lingking
         }
       }
     }
@@ -854,7 +854,12 @@ function translateAndSend(recipientId, original) {
     var translated = data.translated;
     var user = UsersRepository.get(recipientId);
         user.reqIncr();
+    var image="";
+    image=data.image;
     sendTextMessage(recipientId, translated);
+    if (image!="") sendImageMessage(recipientId, image)
+    
+    
     if( user.meetLevelUp() ){
         sendGifMessage(recipientId);
     }
