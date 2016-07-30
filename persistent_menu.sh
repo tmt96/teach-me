@@ -5,12 +5,12 @@ curl -X POST -H "Content-Type: application/json" -d '{
     {
       "type":"postback",
       "title":"Help",
-      "payload":"TeachMe is your personal language learning assistant. You can:\n- Add a word in English to have the bot translate and create a new flashcard, or\n- Turn on Review Mode from menu to review your cards."
+      "payload": "/help"
     },
     {
       "type":"postback",
-      "title":"Start a New Order",
-      "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_START_ORDER"
+      "title":"Start/Stop Review",
+      "payload":"/review_switch"
     },
     {
       "type":"web_url",

@@ -27,6 +27,8 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
 
+var arrGlobalReviews = {};
+
 /*
  * Be sure to setup your config values before running this code. You can 
  * set them using environment variables or modifying the config file in /config.
@@ -53,6 +55,9 @@ const PAGE_ACCESS_TOKEN = (process.env.MESSENGER_PAGE_ACCESS_TOKEN) ?
 const SERVER_URL = (process.env.SERVER_URL) ?
   (process.env.SERVER_URL) :
   config.get('serverURL');
+
+var reviewOn = false;
+var dictUserReviewWords = {}
 
 if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
   console.error("Missing config values");
@@ -229,7 +234,6 @@ function receivedMessage(event) {
     senderID, recipientID, timeOfMessage);
   console.log(JSON.stringify(message));
 
-  var isEcho = message.is_echo;
   var messageId = message.mid;
   var appId = message.app_id;
   var metadata = message.metadata;
@@ -239,12 +243,7 @@ function receivedMessage(event) {
   var messageAttachments = message.attachments;
   var quickReply = message.quick_reply;
 
-  if (isEcho) {
-    // Just logging message echoes to console
-    console.log("Received echo for message %s and app %d with metadata %s", 
-      messageId, appId, metadata);
-    return;
-  } else if (quickReply) {
+  if (quickReply) {
     var quickReplyPayload = quickReply.payload;
     console.log("Quick reply for message %s with payload %s",
       messageId, quickReplyPayload);
@@ -258,63 +257,18 @@ function receivedMessage(event) {
     // If we receive a text message, check to see if it matches any special
     // keywords and send back the corresponding example. Otherwise, just echo
     // the text we received.
-    switch (messageText) {
-      case 'image':
-        sendImageMessage(senderID);
+    switch (messageText.toLowerCase()) {
+      case 'help':
+        sendHelp(senderID);
         break;
-
-      case 'gif':
-        sendGifMessage(senderID);
+      case 'start review':
+        if (reviewOn) sendTextMessage(senderID, 'You are already in review mode.');
+        else turnOnReview(senderID);
         break;
-
-      case 'audio':
-        sendAudioMessage(senderID);
+      case 'stop review':
+        if (!reviewOn) sendTextMessage(senderID, 'You are not in review mode.');
+        else turnOffReview(senderID);
         break;
-
-      case 'video':
-        sendVideoMessage(senderID);
-        break;
-
-      case 'file':
-        sendFileMessage(senderID);
-        break;
-
-      case 'button':
-        sendButtonMessage(senderID);
-        break;
-
-      case 'generic':
-        sendGenericMessage(senderID);
-        break;
-      
-      case 'translate apple':
-        sendTranslateMessage(senderID);
-        break;
-
-      case 'receipt':
-        sendReceiptMessage(senderID);
-        break;
-
-      case 'quick reply':
-        sendQuickReply(senderID);
-        break;        
-
-      case 'read receipt':
-        sendReadReceipt(senderID);
-        break;        
-
-      case 'typing on':
-        sendTypingOn(senderID);
-        break;        
-
-      case 'typing off':
-        sendTypingOff(senderID);
-        break;        
-
-      case 'account linking':
-        sendAccountLinking(senderID);
-        break;
-
       default:
         translateAndSend(senderID, messageText);
     }
@@ -365,12 +319,28 @@ function receivedPostback(event) {
   // The 'payload' param is a developer-defined field which is set in a postback 
   // button for Structured Messages. 
   var payload = event.postback.payload;
-
+  switch (payload) {
+      case '/help':
+          sendHelp(senderID);
+          break;
+      case '/review_switch':
+          if (reviewOn) turnOffReview(senderID);
+          else turnOnReview(senderID);
+      default:
+          break;
+  }
   console.log("Received postback for user %d and page %d with payload '%s' " + 
     "at %d", senderID, recipientID, payload, timeOfPostback);
 
   // When a postback is called, we'll send a message back to the sender to 
   // let them know it was successful
+  if( payload === 'xxx'){
+    // request.get('/review/'+senderID, function(err, res, data){
+    //   arrGlobalReviews.senderID = data;
+      
+    // })
+    
+  }
   sendTextMessage(senderID, "Postback called");
 }
 
@@ -858,6 +828,20 @@ function sendAccountLinking(recipientId) {
   callSendAPI(messageData);
 }
 
+function turnOnReview(userId) {
+    reviewOn = true;
+    sendTextMessage(userId, 'Let\'s start review your cards!');
+    // request.get('/review/'+senderID, function(err, res, data){
+    //   dictUserReviewWords.senderID = data;
+      
+    // });
+}
+
+function turnOffReview(userId) {
+    reviewOn = false;
+    sendTextMessage(userId, 'Review finished! Type a word to create your flashcard!')
+}
+
 /*
  * Call Google API to translate a word
  */
@@ -875,6 +859,13 @@ function translateAndSend(recipientId, original) {
         sendGifMessage(recipientId);
     }
   });
+}
+
+function sendHelp(recipientID) {
+    var messageText = 'Hi! I\'m your personal language learning assistant.\n You can:\n\
+                    - Type a word for me to translate and create flashcard for you, or\n\
+                    - Turn on Review Mode from menu to review your cards.';
+    sendTextMessage(recipientID, messageText);
 }
 
 /*
