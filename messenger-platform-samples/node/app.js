@@ -8,7 +8,7 @@
  */
 
 /* jshint node: true, devel: true */
-'use strict';
+// 'use strict';
 
 const 
   bodyParser = require('body-parser'),
@@ -201,6 +201,7 @@ function receivedAuthentication(event) {
   sendTextMessage(senderID, "Authentication successful");
 }
 
+
 /*
  * Message Event
  *
@@ -282,6 +283,10 @@ function receivedMessage(event) {
       case 'generic':
         sendGenericMessage(senderID);
         break;
+      
+      case 'translate apple':
+        sendTranslateMessage(senderID);
+        break;
 
       case 'receipt':
         sendReceiptMessage(senderID);
@@ -308,7 +313,7 @@ function receivedMessage(event) {
         break;
 
       default:
-        sendTextMessage(senderID, messageText);
+        translateAndSend(senderID, messageText);
     }
   } else if (messageAttachments) {
     sendTextMessage(senderID, "Message with attachment received");
@@ -620,6 +625,58 @@ function sendGenericMessage(recipientId) {
 }
 
 /*
+ * Send a Structured Message (Generic Message type) using the Send API.
+ *
+ */
+function sendTranslateMessage(recipientId) {
+  
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      attachment: {
+        type: "template",
+        payload: {
+          template_type: "generic",
+          elements: [{
+            title: "Qua Tao",
+            subtitle: "Next-generation virtual reality",
+            item_url: "https://www.oculus.com/en-us/rift/",               
+            image_url: SERVER_URL + "/assets/rift.png",
+            buttons: [{
+              type: "web_url",
+              url: "https://www.oculus.com/en-us/rift/",
+              title: "Open Web URL"
+            }, {
+              type: "postback",
+              title: "Call Postback",
+              payload: "Payload for first bubble",
+            }],
+          }, {
+            title: "Qua Bom",
+            subtitle: "Your Hands, Now in VR",
+            item_url: "https://www.oculus.com/en-us/touch/",               
+            image_url: SERVER_URL + "/assets/touch.png",
+            buttons: [{
+              type: "web_url",
+              url: "https://www.oculus.com/en-us/touch/",
+              title: "Open Web URL"
+            }, {
+              type: "postback",
+              title: "Call Postback",
+              payload: "Payload for second bubble",
+            }]
+          }]
+        }
+      }
+    }
+  };  
+
+  callSendAPI(messageData);
+}
+
+/*
  * Send a receipt message using the Send API.
  *
  */
@@ -796,6 +853,19 @@ function sendAccountLinking(recipientId) {
   };  
 
   callSendAPI(messageData);
+}
+
+/*
+ * Call Google API to translate a word
+ */
+function translateAndSend(recipientId, original) {
+  var qs = {
+    q : original
+  };
+  request.get('https://teachmeanything.herokuapp.com/t',{qs: qs, json:true}, function(err, res, data){
+    var translated = data.translated;
+    sendTextMessage(recipientId, translated);
+  });
 }
 
 /*
