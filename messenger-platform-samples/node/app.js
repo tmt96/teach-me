@@ -858,20 +858,9 @@ function translateAndSend(recipientId, original) {
     image=data.image;
     sendTextMessage(recipientId, translated);
     if (image!="") sendImageMessage(recipientId, image)
-    
-    sendTextMessage(recipientId,"Some sentenses about your word:");
-    var sentence=data.sentenses[0].source;
-     sendTextMessage(recipientId,sentence);
-    var sentence=data.sentenses[0].translated;
-     sendTextMessage(recipientId,"->"+sentence);
-     
-    var sentence=data.sentenses[1].source;
-    sendTextMessage(recipientId,sentence);
-    var sentence=data.sentenses[1].translated;
-     sendTextMessage(recipientId,"->"+sentence);
-     
-     
-    if( user.meetLevelUp() ){
+    sendTextMessage(recipientId,"Some sentenses about your word:"+data.sentenses[0].source+data.sentenses[0].translated+""+sentence=data.sentenses[1].source+data.sentenses[1].translated);
+  
+      if( user.meetLevelUp() ){
         sendGifMessage(recipientId);
     }
   });
