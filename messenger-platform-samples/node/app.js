@@ -51,6 +51,13 @@ const SERVER_URL = (process.env.SERVER_URL) ?
   (process.env.SERVER_URL) :
   config.get('serverURL');
 
+// URL where the app is running (include protocol). Used to point to scripts and 
+// assets located at this address. 
+var endpoint = (process.env.ENDPOINT) ?
+  (process.env.ENDPOINT) :
+  config.get('endpoint');
+
+
 var reviewOn = false;
 var dictUserReviewWords = {}
 
@@ -326,10 +333,6 @@ function receivedPostback(event) {
   }
   console.log("Received postback for user %d and page %d with payload '%s' " + 
     "at %d", senderID, recipientID, payload, timeOfPostback);
-
-  // When a postback is called, we'll send a message back to the sender to 
-  // let them know it was successful
-  sendTextMessage(senderID, "Postback called");
 }
 
 /*
@@ -819,10 +822,10 @@ function sendAccountLinking(recipientId) {
 function turnOnReview(userId) {
     reviewOn = true;
     sendTextMessage(userId, 'Let\'s start review your cards!');
-    // request.get('/review/'+senderID, function(err, res, data){
-    //   dictUserReviewWords.senderID = data;
+    request.get(endpoint + '/u?uid=' + userId, function(err, res, data){
+      dictUserReviewWords.senderID = data;
       
-    // });
+    });
 }
 
 function turnOffReview(userId) {
@@ -837,7 +840,7 @@ function translateAndSend(recipientId, original) {
   var qs = {
     q : original
   };
-  request.get('https://teachmeanything.herokuapp.com/t',{qs: qs, json:true}, function(err, res, data){
+  request.get(endpoint + 't',{qs: qs, json:true}, function(err, res, data){
     var translated = data.translated;
     sendTextMessage(recipientId, translated);
   });
