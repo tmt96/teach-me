@@ -859,6 +859,7 @@ function reviewWord(userId, data, pos) {
         title: data[next].translated,
         payload: "/wrong-answer"
       };
+    }
   }
 
   sendButtonMessage(userId, data[pos].word, buttons); 
@@ -879,10 +880,10 @@ function translateAndSend(recipientId, original) {
     var image="";
     image=data.image;
     sendTextMessage(recipientId, translated);
-    if (image!=="") sendImageMessage(recipientId, image)
-    
-    
-    if( user.meetLevelUp() ){
+    if (image!="") sendImageMessage(recipientId, image)
+    sendTextMessage(recipientId,"Examples:\n\n"+data.sentenses[0].source+"\nTranslation\n" + data.sentenses[0].translated+"\n\n"+data.sentenses[1].source+"\nTranslation\n"+data.sentenses[1].translated);
+  
+      if( user.meetLevelUp() ){
         sendGifMessage(recipientId);
     }
   });
