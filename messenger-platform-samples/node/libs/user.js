@@ -14,7 +14,15 @@ User.prototype.touch = function()
 User.prototype.reqIncr = function()
 {
     this.totalReqs++;
+    if( this.meetLevelUp() ){
+    	this.level++;
+    }
 };
+
+User.prototype.getLevel = function()
+{
+	return this.level;
+}
 
 User.prototype.meetLevelUp = function()
 {

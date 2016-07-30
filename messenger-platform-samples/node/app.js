@@ -412,6 +412,8 @@ function sendImageMessage(recipientId,linking) {
  *
  */
 function sendGifMessage(recipientId) {
+  var user = UsersRepository.get(recipientId);
+  var level = (user.getLevel() % 5) + 1;
   var messageData = {
     recipient: {
       id: recipientId
@@ -420,7 +422,7 @@ function sendGifMessage(recipientId) {
       attachment: {
         type: "image",
         payload: {
-          url: SERVER_URL + "/assets/instagram_logo.gif"
+          url: SERVER_URL + "/assets/level_up_"+level+".gif"
         }
       }
     }
