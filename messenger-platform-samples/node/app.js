@@ -869,7 +869,7 @@ function translateAndSend(recipientId, original) {
   request.get('https://teachmeanything.herokuapp.com/t',{qs: qs, json:true}, function(err, res, data){
     var translated = data.translated;
     var user = UsersRepository.get(recipientId);
-        user.incrReq();
+        user.reqIncr();
     sendTextMessage(recipientId, translated);
     if( user.meetLevelUp() ){
         sendGifMessage(recipientId);
