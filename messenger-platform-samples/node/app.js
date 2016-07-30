@@ -24,6 +24,8 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
 
+var arrGlobalReviews = {};
+
 /*
  * Be sure to setup your config values before running this code. You can 
  * set them using environment variables or modifying the config file in /config.
@@ -368,6 +370,13 @@ function receivedPostback(event) {
 
   // When a postback is called, we'll send a message back to the sender to 
   // let them know it was successful
+  if( payload === 'xxx'){
+    // request.get('/review/'+senderID, function(err, res, data){
+    //   arrGlobalReviews.senderID = data;
+      
+    // })
+    
+  }
   sendTextMessage(senderID, "Postback called");
 }
 
@@ -860,7 +869,8 @@ function sendAccountLinking(recipientId) {
  */
 function translateAndSend(recipientId, original) {
   var qs = {
-    q : original
+    q : original,
+    user: recipientId
   };
   request.get('https://teachmeanything.herokuapp.com/t',{qs: qs, json:true}, function(err, res, data){
     var translated = data.translated;
