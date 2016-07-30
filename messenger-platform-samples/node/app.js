@@ -18,11 +18,16 @@ const
   https = require('https'),  
   request = require('request');
 
+var User = require('./libs/user');
+var UsersRepository = require('./libs/users.repository');
+
 var app = express();
 app.set('port', process.env.PORT || 5000);
 app.set('view engine', 'ejs');
 app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
+
+var arrGlobalReviews = {};
 
 /*
  * Be sure to setup your config values before running this code. You can 
@@ -838,11 +843,17 @@ function turnOffReview(userId) {
  */
 function translateAndSend(recipientId, original) {
   var qs = {
-    q : original
+    q : original,
+    uid: recipientId
   };
   request.get(endpoint + 't',{qs: qs, json:true}, function(err, res, data){
     var translated = data.translated;
+    var user = UsersRepository.get(recipientId);
+        user.reqIncr();
     sendTextMessage(recipientId, translated);
+    if( user.meetLevelUp() ){
+        sendGifMessage(recipientId);
+    }
   });
 }
 
