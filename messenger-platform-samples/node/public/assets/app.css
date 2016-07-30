@@ -8,6 +8,9 @@ body{
     flex-direction: column;
     justify-content: space-between;
 }
+.app nav{
+	background-color: transparent;
+}
 footer.page-footer{
     background-color: rgba(20, 39, 80, 0.55);
 }
