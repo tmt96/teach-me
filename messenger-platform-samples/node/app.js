@@ -398,7 +398,7 @@ function sendImageMessage(recipientId,linking) {
       attachment: {
         type: "image",
         payload: {
-          url: lingking
+          url: linking
         }
       }
     }
@@ -822,8 +822,10 @@ function sendAccountLinking(recipientId) {
 function turnOnReview(userId) {
   reviewOn = true;
   sendTextMessage(userId, 'Let\'s start review your cards!');
-  request.get(endpoint + '/u?uid=' + userId, function(err, res, data){
-    dictUserReviewWords.senderID = data;
+  
+  request.get(endpoint + 'u?uid=' + userId, function(err, res, data){
+    arrGlobalReviews.userId = data;
+    console.log(data);
     sendTextMessage(userId, 'What is the correct translation of these words?');
     for (var i = 0; i < data.length; i++) {
       if (!reviewOn) return;
@@ -842,16 +844,16 @@ function reviewWord(userId, data, pos) {
   var buttons = new Array(3);
   var chosen = [pos];
 
-  buttons[Math.floor(Math.random()*items.length)] = {
+  buttons[Math.floor(Math.random()*(data.length))] = {
     type: "postback",
     title: data[pos].translated,
     payload: "/right-answer"
   };
 
   for (var i = 0; i<buttons.length; i++) {
-    if (typeof array[index] !== 'undefined' && array[index] !== null) {    
+    if (typeof chosen[i] !== 'undefined' && chosen[i] !== null) {    
       do {
-        var next = Math.floor(Math.random()*items.length);
+        var next = Math.floor(Math.random()*(chosen.length));
       } while (chosen.indexOf(next) > -1);
       chosen.push(next);
       buttons[i] = {
@@ -907,7 +909,7 @@ function translateAndSend(recipientId, original) {
         
         var user = UsersRepository.get(recipientId);
         user.reqIncr();
-        
+
         callSendAPI(messageData);
         
         if (user.meetLevelUp()) {
