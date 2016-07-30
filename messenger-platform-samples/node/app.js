@@ -18,6 +18,9 @@ const
   https = require('https'),  
   request = require('request');
 
+var User = require('./libs/user');
+var UsersRepository = require('./libs/users.repository');
+
 var app = express();
 app.set('port', process.env.PORT || 5000);
 app.set('view engine', 'ejs');
@@ -845,11 +848,16 @@ function turnOffReview(userId) {
 function translateAndSend(recipientId, original) {
   var qs = {
     q : original,
-    user: recipientId
+    uid: recipientId
   };
   request.get('https://teachmeanything.herokuapp.com/t',{qs: qs, json:true}, function(err, res, data){
     var translated = data.translated;
+    var user = UsersRepository.get(recipientId);
+        user.incrReq();
     sendTextMessage(recipientId, translated);
+    if( user.meetLevelUp() ){
+        sendGifMessage(recipientId);
+    }
   });
 }
 
