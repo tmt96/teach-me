@@ -9,13 +9,16 @@ LICENSE file in the root directory of this source tree.
 -->
 <html>
   <head>
-    <title>Messenger Demo</title>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
+    <link rel="stylesheet" href="assets/app.css">
+    <title>TeachMe</title>
   </head>
   <body>
     <script>
       window.fbAsyncInit = function() {
         FB.init({
-          appId: 'APP_ID',
+          appId: '186987698382571',
           xfbml: true,
           version: 'v2.6'
         });
@@ -30,14 +33,23 @@ LICENSE file in the root directory of this source tree.
        }(document, 'script', 'facebook-jssdk'));
     </script>
 
-    <h1>Messenger Demo</h1>
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">TeachMe</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="sass.html">Blog</a></li>
+          <li><a href="badges.html">Products</a></li>
+          <li><a href="collapsible.html">Features</a></li>
+        </ul>
+      </div>
+    </nav>
 
     <div>
       <p>The "Send to Messenger" plugin will trigger an authentication callback to your webhook.</p>
 
       <div class="fb-send-to-messenger" 
-        messenger_app_id='APP_ID'
-        page_id='PAGE_ID'
+        messenger_app_id='186987698382571'
+        page_id='1138280052881796'
         data-ref="PASS_THROUGH_PARAM" 
         color="blue" 
         size="standard">
@@ -48,12 +60,38 @@ LICENSE file in the root directory of this source tree.
       <p>The "Message Us" plugin takes the user directly to Messenger and into a thread with your Page.</p>
 
       <div class="fb-messengermessageus" 
-        messenger_app_id='APP_ID'
-        page_id='PAGE_ID'
+        messenger_app_id='186987698382571'
+        page_id='1138280052881796'
         color="blue"
         size="standard">
       </div>
     </div>
-
+    
+    <footer class="page-footer">
+          <div class="container">
+            <div class="row">
+              <div class="col l6 s12">
+                <h5 class="white-text">TeachMe</h5>
+                <p class="grey-text text-lighten-4">Simple flashcard chattbot. Personal learning assistant.</p>
+              </div>
+              <div class="col l4 offset-l2 s12">
+                <h5 class="white-text">Links</h5>
+                <ul>
+                  <li><a class="grey-text text-lighten-3" href="#!">About us</a></li>
+                  <li><a class="grey-text text-lighten-3" href="#!">Privacy</a></li>
+                  <li><a class="grey-text text-lighten-3" href="#!">Contact</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="footer-copyright">
+            <div class="container">
+            © 2016 TeachMe
+          </div>
+        </footer>
+        
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
   </body>
 </html>
