@@ -846,19 +846,51 @@ function turnOffReview(userId) {
  * Call Google API to translate a word
  */
 function translateAndSend(recipientId, original) {
-  var qs = {
-    q : original,
-    uid: recipientId
-  };
-  request.get('https://teachmeanything.herokuapp.com/t',{qs: qs, json:true}, function(err, res, data){
-    var translated = data.translated;
-    var user = UsersRepository.get(recipientId);
+    var qs = {
+        q: original,
+        uid: recipientId
+    };
+    request.get('https://teachmeanything.herokuapp.com/t', {qs: qs, json: true}, function (err, res, data) {
+       
+        var messageData = null;
+        try {
+            var elements = [];
+            for (var i = 0; i < data.sentenses.length; i++)
+            {
+                elements.push({
+                    title: data.translated,
+                    subtitle: data.sentenses[i].source,
+                    image_url: data.image
+                });
+            }
+            messageData = {
+                recipient: {
+                    id: recipientId
+                },
+                message: {
+                    attachment: {
+                        type: "template",
+                        payload: {
+                            template_type: "generic",
+                            elements: elements
+                        }
+                    }
+                }
+            };
+        } catch(e){
+            sendTextMessage(recipientId, 'Can not translated.');
+            return;
+        }
+        
+        var user = UsersRepository.get(recipientId);
         user.reqIncr();
-    sendTextMessage(recipientId, translated);
-    if( user.meetLevelUp() ){
-        sendGifMessage(recipientId);
-    }
-  });
+        
+        callSendAPI(messageData);
+        
+        if (user.meetLevelUp()) {
+            sendGifMessage(recipientId);
+        }
+    });
 }
 
 function sendHelp(recipientID) {
