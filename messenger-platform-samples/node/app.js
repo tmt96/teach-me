@@ -859,7 +859,18 @@ function translateAndSend(recipientId, original) {
     sendTextMessage(recipientId, translated);
     if (image!="") sendImageMessage(recipientId, image)
     
-    
+    sendTextMessage(recipientId,"Some sentenses about your word:");
+    var sentence=data.sentenses[0].source;
+     sendTextMessage(recipientId,sentence);
+    var sentence=data.sentenses[0].translated;
+     sendTextMessage(recipientId,"->"+sentence);
+     
+    var sentence=data.sentenses[1].source;
+    sendTextMessage(recipientId,sentence);
+    var sentence=data.sentenses[1].translated;
+     sendTextMessage(recipientId,"->"+sentence);
+     
+     
     if( user.meetLevelUp() ){
         sendGifMessage(recipientId);
     }
