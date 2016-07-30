@@ -327,14 +327,21 @@ function receivedPostback(event) {
   // button for Structured Messages. 
   var payload = event.postback.payload;
   switch (payload) {
-      case '/help':
-          sendHelp(senderID);
-          break;
-      case '/review_switch':
-          if (reviewOn) turnOffReview(senderID);
-          else turnOnReview(senderID);
-      default:
-          break;
+    case '/help':
+      sendHelp(senderID);
+      break;
+    case '/review_switch':
+      if (reviewOn) turnOffReview(senderID);
+      else turnOnReview(senderID);
+      break;
+    case '/wrong-answer':
+      sendTextMessage(senderID, 'Wrong answer!');
+      break;
+    case 'right-answer':
+      sendTextMessage(senderID, 'Correct!');
+      break;
+    default:
+      break;
   }
   console.log("Received postback for user %d and page %d with payload '%s' " + 
     "at %d", senderID, recipientID, payload, timeOfPostback);
@@ -510,7 +517,7 @@ function sendTextMessage(recipientId, messageText) {
  * Send a button message using the Send API.
  *
  */
-function sendButtonMessage(recipientId) {
+function sendButtonMessage(recipientId, text, buttons) {
   var messageData = {
     recipient: {
       id: recipientId
@@ -520,20 +527,8 @@ function sendButtonMessage(recipientId) {
         type: "template",
         payload: {
           template_type: "button",
-          text: "This is test text",
-          buttons:[{
-            type: "web_url",
-            url: "https://www.oculus.com/en-us/rift/",
-            title: "Open Web URL"
-          }, {
-            type: "postback",
-            title: "Trigger Postback",
-            payload: "DEVELOPED_DEFINED_PAYLOAD"
-          }, {
-            type: "phone_number",
-            title: "Call Phone Number",
-            payload: "+16505551234"
-          }]
+          text: text,
+          buttons:buttons
         }
       }
     }
@@ -825,17 +820,48 @@ function sendAccountLinking(recipientId) {
 }
 
 function turnOnReview(userId) {
-    reviewOn = true;
-    sendTextMessage(userId, 'Let\'s start review your cards!');
-    request.get(endpoint + '/u?uid=' + userId, function(err, res, data){
-      dictUserReviewWords.senderID = data;
-      
-    });
+  reviewOn = true;
+  sendTextMessage(userId, 'Let\'s start review your cards!');
+  request.get(endpoint + '/u?uid=' + userId, function(err, res, data){
+    dictUserReviewWords.senderID = data;
+    sendTextMessage(userId, 'What is the correct translation of these words?');
+    for (var i = 0; i < data.length; i++) {
+      if (!reviewOn) return;
+      reviewWord(userId, data, i);
+    }
+  });
 }
 
 function turnOffReview(userId) {
-    reviewOn = false;
-    sendTextMessage(userId, 'Review finished! Type a word to create your flashcard!')
+  reviewOn = false;
+  sendTextMessage(userId, 'Review finished! Type a word to create your flashcard!');
+}
+
+function reviewWord(userId, data, pos) {
+  var ourWord = data[pos];
+  var buttons = new Array(3);
+  var chosen = [pos];
+
+  buttons[Math.floor(Math.random()*items.length)] = {
+    type: "postback",
+    title: data[pos].translated,
+    payload: "/right-answer"
+  };
+
+  for (var i = 0; i<buttons.length; i++) {
+    if (typeof array[index] !== 'undefined' && array[index] !== null) {    
+      do {
+        var next = Math.floor(Math.random()*items.length);
+      } while (chosen.indexOf(next) > -1);
+      chosen.push(next);
+      buttons[i] = {
+        type: "postback",
+        title: data[next].translated,
+        payload: "/wrong-answer"
+      };
+  }
+
+  sendButtonMessage(userId, data[pos].word, buttons); 
 }
 
 /*
@@ -853,7 +879,7 @@ function translateAndSend(recipientId, original) {
     var image="";
     image=data.image;
     sendTextMessage(recipientId, translated);
-    if (image!="") sendImageMessage(recipientId, image)
+    if (image!=="") sendImageMessage(recipientId, image)
     
     
     if( user.meetLevelUp() ){
