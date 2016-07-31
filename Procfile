@@ -1,2 +1,2 @@
-web: node messenger-platform-samples/node/app.js
+web: node app.js
 

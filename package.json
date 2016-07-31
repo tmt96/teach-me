@@ -1,22 +1,27 @@
 {
-  "name": "chat-example",
-  "version": "0.0.0",
-  "description": "A chat example to showcase how to use `socket.io` with a static `express` server",
-  "main": "server.js",
-  "repository": "",
-  "author": "Mostafa Eweda <mostafa@c9.io>",
-  "dependencies": {
-    "async": "~0.2.8",
-    "express": "~3.2.4",
-    "request": "2.74.0",
-    "socket.io": "~0.9.14",
-    "body-parser": "^1.15.0",
-    "ejs": "^2.4.2",
-    "config": "^1.20.4"
-    
-    
+  "name": "teach-me",
+  "version": "0.1.0",
+  "description": "Simple flashcard chattbot. Personal learning assistant",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "lint": "jshint --exclude node_modules .",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-   "engines": {
+  "repository": {
+    "type": "git",
+    "url": "https://ide.c9.io/tpphu/test"
+  },
+  "author": "TeachMe Team",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "config": "^1.20.4",
+    "ejs": "^2.4.2",
+    "express": "^4.13.4",
+    "request": "^2.72.0"
+  },
+  "engines": {
     "node": "~4.1.2"
   }
 }
