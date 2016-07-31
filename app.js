@@ -887,7 +887,7 @@ function sendQuestion(userId) {
     chosen.push(next);
     buttons[i] = {
       type: "postback",
-      title: arrAnswers[next].translated,
+      title: arrAnswers[next],
       payload: "/wrong-answer"
     };
   }
