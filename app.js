@@ -857,6 +857,11 @@ function turnOffReview(userId) {
 }
 
 function sendQuestion(userId) {
+  if (!arrGlobalReviews.userId || arrGlobalReviews.userId.length<4) {
+      sendTextMessage(userId, 'Not enough words for you to learn. Stop review words.');
+      turnOffReview(userId);
+      return;
+  }
   sendTextMessage(userId, 'What is the correct translation of this word?');
   
   var ourWord = arrGlobalReviews.userId[0];
