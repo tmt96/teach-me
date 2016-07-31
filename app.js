@@ -926,7 +926,7 @@ function receivedWrongAnswer(userId) {
     q: originalWord,
     answer: 'wrong'
   };
-  request.get(endpoint+'a', {qs:qs, json: true}, function (err, res, data));
+  request.get(endpoint+'a', {qs:qs, json: true}, function (err, res, data){});
 }
 
 /*
