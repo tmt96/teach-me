@@ -333,7 +333,7 @@ function receivedPostback(event) {
       sendHelp(senderID);
       break;
     case '/review_switch':
-      var user = UsersRepository.get(senderId);
+      var user = UsersRepository.get(senderID);
       if (user.reviewOn) turnOffReview(senderID);
       else turnOnReview(senderID);
       break;
