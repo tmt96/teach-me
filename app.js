@@ -922,7 +922,7 @@ function receivedRightAnswer(userId) {
 
 function receivedWrongAnswer(userId) {
   var user = UsersRepository.get(userId);
-  sendTextMessage(userId, 'Oh no... It is not correct. Let\'s see what the correct meaning of' + originalWord + 'is.');
+  sendTextMessage(userId, 'Oh no... It is not correct. Let\'s see what the correct meaning of' + user.originalWord + 'is.');
   translateAndSend(userId, user.originalWord);
 
   setTimeout( function() {
