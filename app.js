@@ -864,14 +864,13 @@ function sendQuestion(userId) {
   sendTextMessage(userId, 'What is the correct translation of this word?');
   
   var originalWord = question.word;
-  var correctAnswer = question.translated;
   var arrAnswers = user.getAnswerList();
   var buttons = [];
   arrAnswers = _.shuffle(arrAnswers);
 
   for(var i = 0; i < arrAnswers.length; i++)
   {
-      if (arrAnswers[i] === question.word) {
+      if (arrAnswers[i] === user.correctAnswer) {
           continue;
       }
       buttons.push({
@@ -886,7 +885,7 @@ function sendQuestion(userId) {
 
   for(i = 0; i < arrAnswers.length; i++)
   {
-      if (arrAnswers[i] !== question.word) {
+      if (arrAnswers[i] !== user.correctAnswer) {
           continue;
       }
       buttons.push({
