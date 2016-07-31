@@ -843,6 +843,12 @@ function turnOnReview(userId) {
         console.log(i, data[i].translated);
         arrAnswers[i] = data[i].translated;
       }
+      if (!arrGlobalReviews.userId || arrGlobalReviews.userId.length<4) {
+        sendTextMessage(userId, 'Not enough words for you to learn. Stop review words.');
+        turnOffReview(userId);
+        return;
+      }
+
       sendQuestion(userId);
   });
 }
@@ -857,11 +863,12 @@ function turnOffReview(userId) {
 }
 
 function sendQuestion(userId) {
-  if (!arrGlobalReviews.userId || arrGlobalReviews.userId.length<4) {
-      sendTextMessage(userId, 'Not enough words for you to learn. Stop review words.');
-      turnOffReview(userId);
-      return;
+  if (!arrGlobalReviews.userId || arrGlobalReviews.userId.length===0) {
+    sendTextMessage(userId, 'Finished review cards! Great job!');
+    turnOffReview(userId);
+    return;
   }
+
   sendTextMessage(userId, 'What is the correct translation of this word?');
   
   var ourWord = arrGlobalReviews.userId[0];
@@ -869,18 +876,18 @@ function sendQuestion(userId) {
   correctAnswer = ourWord.translated;
   var chosen = [];
   chosen.push(0);
-  var buttons = new Array(Math.min(3, arrGlobalReviews.userId.length));
+  var buttons = new Array(Math.min(3, arrAnswers.length));
   
   for (var i = 0; i<buttons.length; i++) {
     do {
-      var next = Math.floor(Math.random()*(arrGlobalReviews.userId.length));
+      var next = Math.floor(Math.random()*(arrAnswers.length));
     } while (chosen.indexOf(next) > -1);
     console.log(chosen);
     
     chosen.push(next);
     buttons[i] = {
       type: "postback",
-      title: arrGlobalReviews.userId[next].translated,
+      title: arrAnswers[next].translated,
       payload: "/wrong-answer"
     };
   }
