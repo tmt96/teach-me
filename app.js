@@ -850,16 +850,14 @@ function turnOnReview(userId) {
 function turnOffReview(userId) {
   reviewOn = false;
   arrAnswers = [];
-  delete arrGlobalReviews.userId;
+  arrGlobalReviews.userId = [];
   originalWord = '';
   correctAnswer = '';
   sendTextMessage(userId, 'Review finished! Type a word to create your flashcard!');
 }
 
-
 function sendQuestion(userId) {
   sendTextMessage(userId, 'What is the correct translation of this word?');
-
   
   var ourWord = arrGlobalReviews.userId[0];
   originalWord = ourWord.word;
@@ -898,32 +896,32 @@ function receivedRightAnswer(userId) {
   translateAndSend(userId, originalWord);
   sendTextMessage(userId, 'Yes, that\'s correct! Great job!!');
   
+  setTimeout( function() {
+    sendQuestion(userId);
+  }, 2000);
+
   var qs = {
       uid: userId,
       q: originalWord,
       answer: 'right'
   };
-  request.post(endpoint+'a', {qs:qs});
-  
-  setTimeout( function() {
-    sendQuestion(userId);
-  }, 2000);
+  request.get(endpoint+'a', {qs:qs, json: true}, function (err, res, data){});
 }
 
 function receivedWrongAnswer(userId) {
   sendTextMessage(userId, 'Oh no... It is not correct. Let\'s see what the correct meaning of' + originalWord + 'is.');
   translateAndSend(userId, originalWord);
-  
-    var qs = {
-      uid: userId,
-      q: originalWord,
-      answer: 'wrong'
-  };
-  request.post(endpoint+'a', {qs:qs});
 
   setTimeout( function() {
     sendQuestion(userId);
   }, 2000);
+  
+  var qs = {
+    uid: userId,
+    q: originalWord,
+    answer: 'wrong'
+  };
+  request.get(endpoint+'a', {qs:qs, json: true}, function (err, res, data));
 }
 
 /*
