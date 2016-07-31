@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-present, Facebook, Inc.
+ * Copyright 2016-present, TeachMe Team.
  * All rights reserved.
  *
  * This source code is licensed under the license found in the
@@ -28,6 +28,8 @@ app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
 
 var arrGlobalReviews = {};
+var arrAnswers = [];
+var originalWord = '';
 
 /*
  * Be sure to setup your config values before running this code. You can 
@@ -335,10 +337,10 @@ function receivedPostback(event) {
       else turnOnReview(senderID);
       break;
     case '/wrong-answer':
-      sendTextMessage(senderID, 'Wrong answer!');
+      receivedWrongAnswer(senderID);
       break;
-    case 'right-answer':
-      sendTextMessage(senderID, 'Correct!');
+    case '/right-answer':
+      receivedRightAnswer(senderID);
       break;
     default:
       break;
@@ -520,6 +522,7 @@ function sendTextMessage(recipientId, messageText) {
  *
  */
 function sendButtonMessage(recipientId, text, buttons) {
+  console.log(buttons);
   var messageData = {
     recipient: {
       id: recipientId
@@ -824,49 +827,96 @@ function sendAccountLinking(recipientId) {
 function turnOnReview(userId) {
   reviewOn = true;
   sendTextMessage(userId, 'Let\'s start review your cards!');
-  
-  request.get(endpoint + 'u?uid=' + userId, function(err, res, data){
-    arrGlobalReviews.userId = data;
-    console.log(data);
-    sendTextMessage(userId, 'What is the correct translation of these words?');
-    for (var i = 0; i < data.length; i++) {
-      if (!reviewOn) return;
-      reviewWord(userId, data, i);
-    }
+    var qs = {
+        uid: userId
+    };
+    request.get(endpoint+'u', {qs: qs, json: true}, function (err, res, data) {
+      console.log(data.length);
+      arrGlobalReviews.userId = data;
+
+      for (var i=0; i < data.length; i++) {
+        console.log(i, data[i].translated);
+        arrAnswers[i] = data[i].translated;
+      }
+      sendQuestion(userId);
   });
 }
 
 function turnOffReview(userId) {
   reviewOn = false;
+  arrAnswers = [];
+  delete arrGlobalReviews.userId;
+  originalWord = '';
   sendTextMessage(userId, 'Review finished! Type a word to create your flashcard!');
 }
 
-function reviewWord(userId, data, pos) {
-  var ourWord = data[pos];
-  var buttons = new Array(3);
-  var chosen = [pos];
 
-  buttons[Math.floor(Math.random()*(data.length))] = {
+function sendQuestion(userId) {
+  sendTextMessage(userId, 'What is the correct translation of this word?');
+
+  
+  var ourWord = arrGlobalReviews.userId[0];
+  originalWord = ourWord.word;
+  var chosen = [];
+  chosen.push(0);
+  var buttons = new Array(Math.min(3, arrGlobalReviews.userId.length));
+  
+  for (var i = 0; i<buttons.length; i++) {
+    do {
+      var next = Math.floor(Math.random()*(arrGlobalReviews.userId.length));
+    } while (chosen.indexOf(next) > -1);
+    console.log(chosen);
+    
+    chosen.push(next);
+    buttons[i] = {
+      type: "postback",
+      title: arrGlobalReviews.userId[next].translated,
+      payload: "/wrong-answer"
+    };
+  }
+  
+  buttons[Math.floor(Math.random()*(buttons.length))] = {
     type: "postback",
-    title: data[pos].translated,
+    title: ourWord.translated,
     payload: "/right-answer"
   };
+  
+  console.log(buttons);
+  sendButtonMessage(userId, originalWord, JSON.stringify(buttons)); 
 
-  for (var i = 0; i<buttons.length; i++) {
-    if (typeof chosen[i] !== 'undefined' && chosen[i] !== null) {    
-      do {
-        var next = Math.floor(Math.random()*(chosen.length));
-      } while (chosen.indexOf(next) > -1);
-      chosen.push(next);
-      buttons[i] = {
-        type: "postback",
-        title: data[next].translated,
-        payload: "/wrong-answer"
-      };
-    }
-  }
+  arrGlobalReviews.userId.splice(0,1);
+}
 
-  sendButtonMessage(userId, data[pos].word, buttons); 
+function receivedRightAnswer(userId) {
+  translateAndSend(userId, originalWord);
+  sendTextMessage(userId, 'Yes, that\'s correct! Great job!!');
+  
+  var qs = {
+      uid: userId,
+      q: originalWord,
+      answer: 'right'
+  };
+  request.post(endpoint+'a', {qs:qs});
+  
+  setTimeout( function() {
+    sendQuestion(userId);
+  }, 2000);
+}
+
+function receivedWrongAnswer(userId) {
+  sendTextMessage(userId, 'Oh no... It is not correct. Let\'s see what the correct meaning is.');
+  translateAndSend(userId, originalWord);
+  
+    var qs = {
+      uid: userId,
+      q: originalWord,
+      answer: 'wrong'
+  };
+  request.post(endpoint+'a', {qs:qs});
+
+  setTimeout( function() {
+    sendQuestion(userId);
+  }, 2000);
 }
 
 /*
@@ -877,7 +927,7 @@ function translateAndSend(recipientId, original) {
         q: original,
         uid: recipientId
     };
-    request.get('https://teachmeanything.herokuapp.com/t', {qs: qs, json: true}, function (err, res, data) {
+    request.get(endpoint+'t', {qs: qs, json: true}, function (err, res, data) {
        
         var messageData = null;
         try {
