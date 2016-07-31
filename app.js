@@ -30,6 +30,7 @@ app.use(express.static('public'));
 var arrGlobalReviews = {};
 var arrAnswers = [];
 var originalWord = '';
+var correctAnswer = '';
 
 /*
  * Be sure to setup your config values before running this code. You can 
@@ -279,7 +280,11 @@ function receivedMessage(event) {
         else turnOffReview(senderID);
         break;
       default:
-        translateAndSend(senderID, messageText);
+        if (!reviewOn) translateAndSend(senderID, messageText);
+        else if (messageText.toLowerCase() === correctAnswer.toLowerCase())
+          receivedRightAnswer(senderID);
+        else receivedWrongAnswer(senderID);
+        break;
     }
   } else if (messageAttachments) {
     sendTextMessage(senderID, "Message with attachment received");
@@ -847,6 +852,7 @@ function turnOffReview(userId) {
   arrAnswers = [];
   delete arrGlobalReviews.userId;
   originalWord = '';
+  correctAnswer = '';
   sendTextMessage(userId, 'Review finished! Type a word to create your flashcard!');
 }
 
@@ -857,6 +863,7 @@ function sendQuestion(userId) {
   
   var ourWord = arrGlobalReviews.userId[0];
   originalWord = ourWord.word;
+  correctAnswer = ourWord.translated;
   var chosen = [];
   chosen.push(0);
   var buttons = new Array(Math.min(3, arrGlobalReviews.userId.length));
@@ -877,7 +884,7 @@ function sendQuestion(userId) {
   
   buttons[Math.floor(Math.random()*(buttons.length))] = {
     type: "postback",
-    title: ourWord.translated,
+    title: correctAnswer,
     payload: "/right-answer"
   };
   
