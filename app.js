@@ -878,7 +878,7 @@ function sendQuestion(userId) {
         title: arrAnswers[i],
         payload: '/wrong-answer'
       });
-      if( buttons.length === 3){
+      if( buttons.length === 2){
           break;
       }
   }
