@@ -70,11 +70,10 @@ User.prototype.turnOffReview = function()
   this.questions = [];
   this.originalWord = '';
   this.correctAnswer = '';
-}
+};
 
 User.prototype.turnOnReview = function(){
     this.reviewOn = true;
-}
-
+};
 
 module.exports = User;
