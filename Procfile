@@ -1,2 +1,2 @@
-web: node server.js
+web: node mesenger-platform-samples/node/app.js
 
