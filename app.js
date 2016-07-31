@@ -932,13 +932,24 @@ function translateAndSend(recipientId, original) {
         var messageData = null;
         try {
             var elements = [];
-            for (var i = 0; i < data.sentenses.length; i++)
-            {
-                elements.push({
-                    title: data.translated,
-                    subtitle: data.sentenses[i].source,
-                    image_url: data.image
-                });
+            if( data.sentenses && data.sentenses.length ){
+                for (var i = 0; i < data.sentenses.length; i++)
+                {
+                    elements.push({
+                        title: data.translated,
+                        subtitle: data.sentenses[i].source,
+                        image_url: data.image
+                    });
+                }
+            } else {
+                element = {
+                    title: data.query,
+                    subtitle: data.translated
+                };
+                if( data.image ){
+                    element.image_url = data.image; 
+                }
+                elements.push(element);
             }
             messageData = {
                 recipient: {
