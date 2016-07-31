@@ -873,7 +873,7 @@ function sendQuestion(userId) {
   {
       if (arrAnswers[i] === question.word) {
           continue;
-      };
+      }
       buttons.push({
         type: "postback",
         title: arrAnswers[i],
@@ -884,11 +884,11 @@ function sendQuestion(userId) {
       }
   }
 
-  for(var i = 0; i < arrAnswers.length; i++)
+  for(i = 0; i < arrAnswers.length; i++)
   {
-      if (arrAnswer[i] !== question.word) {
+      if (arrAnswers[i] !== question.word) {
           continue;
-      };
+      }
       buttons.push({
         type: "postback",
         title: arrAnswers[i],
