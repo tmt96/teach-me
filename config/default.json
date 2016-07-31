@@ -1,6 +1,6 @@
 {
-    "appSecret": "ed54e25949b547c5472f5b8c4d72a0dc",
-    "pageAccessToken": "EAACqEHdW5usBACQXK37Tk5P2ZAus2tjJ7GntWuPQuDJzyATyZB3CmS6W783HY1ZCDhRcHysAjq0aNEDjCOCC6jRwHGDNGmtfyZClkIAObXxH9dCKBKmfrK5pD7vKJoRnoOMcJbavrqyZCGARBZAdf0uTiVfCqseQSpnIJsT0KX7wZDZD",
+    "appSecret": "da683e03a0d4640db57133d4f7c9aac8",
+    "pageAccessToken": "EAACJPiiXoZC0BAEfvtSnO226RpbRZBiWUosnFDesKXFlhVLfYZBKQG2wwehotkFpCWZAmxHCVpT4cvhCFAZBfVfNZAVe1rBHNOR9pLSoS5p2sSm0yy2r5sugK57BqLgaZAjv2dZAZAK2Ddvc5qZA4UnpH2ZAluZClWNfZAcyxqPKb4LOzvQZDZD",
     "validationToken": "teachme",
     "serverURL": "https://test-tpphu.c9.io:8080/",
     "endpoint": "https://teachmeanything.herokuapp.com/"
