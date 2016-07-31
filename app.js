@@ -911,7 +911,7 @@ function receivedRightAnswer(userId) {
 }
 
 function receivedWrongAnswer(userId) {
-  sendTextMessage(userId, 'Oh no... It is not correct. Let\'s see what the correct meaning is.');
+  sendTextMessage(userId, 'Oh no... It is not correct. Let\'s see what the correct meaning of' + originalWord + 'is.');
   translateAndSend(userId, originalWord);
   
     var qs = {
