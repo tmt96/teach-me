@@ -1,0 +1,7 @@
+{
+    "appSecret": "da683e03a0d4640db57133d4f7c9aac8",
+    "pageAccessToken": "EAACJPiiXoZC0BAEfvtSnO226RpbRZBiWUosnFDesKXFlhVLfYZBKQG2wwehotkFpCWZAmxHCVpT4cvhCFAZBfVfNZAVe1rBHNOR9pLSoS5p2sSm0yy2r5sugK57BqLgaZAjv2dZAZAK2Ddvc5qZA4UnpH2ZAluZClWNfZAcyxqPKb4LOzvQZDZD",
+    "validationToken": "teachme",
+    "serverURL": "https://teachmejs.herokuapp.com/",
+    "endpoint": "https://teachmeanything.herokuapp.com/"
+}
