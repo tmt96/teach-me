@@ -16,6 +16,7 @@ const
   crypto = require('crypto'),
   express = require('express'),
   https = require('https'),  
+  _ = require('underscore'),
   request = require('request');
 
 var User = require('./libs/user');
@@ -26,11 +27,6 @@ app.set('port', process.env.PORT || 5000);
 app.set('view engine', 'ejs');
 app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
-
-var arrGlobalReviews = {};
-var arrAnswers = [];
-var originalWord = '';
-var correctAnswer = '';
 
 /*
  * Be sure to setup your config values before running this code. You can 
@@ -66,8 +62,6 @@ var endpoint = (process.env.ENDPOINT) ?
   config.get('endpoint');
 
 
-var reviewOn = false;
-var dictUserReviewWords = {}
 
 if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
   console.error("Missing config values");
@@ -263,6 +257,7 @@ function receivedMessage(event) {
   }
 
   if (messageText) {
+    var user = UsersRepository.get(senderID);
 
     // If we receive a text message, check to see if it matches any special
     // keywords and send back the corresponding example. Otherwise, just echo
@@ -272,16 +267,16 @@ function receivedMessage(event) {
         sendHelp(senderID);
         break;
       case 'start review':
-        if (reviewOn) sendTextMessage(senderID, 'You are already in review mode.');
+        if (user.reviewOn) sendTextMessage(senderID, 'You are already in review mode.');
         else turnOnReview(senderID);
         break;
       case 'stop review':
-        if (!reviewOn) sendTextMessage(senderID, 'You are not in review mode.');
+        if (!user.reviewOn) sendTextMessage(senderID, 'You are not in review mode.');
         else turnOffReview(senderID);
         break;
       default:
-        if (!reviewOn) translateAndSend(senderID, messageText);
-        else if (messageText.toLowerCase() === correctAnswer.toLowerCase())
+        if (!user.reviewOn) translateAndSend(senderID, messageText);
+        else if (messageText.toLowerCase() === user.correctAnswer.toLowerCase())
           receivedRightAnswer(senderID);
         else receivedWrongAnswer(senderID);
         break;
@@ -338,7 +333,8 @@ function receivedPostback(event) {
       sendHelp(senderID);
       break;
     case '/review_switch':
-      if (reviewOn) turnOffReview(senderID);
+      var user = UsersRepository.get(senderId);
+      if (user.reviewOn) turnOffReview(senderID);
       else turnOnReview(senderID);
       break;
     case '/wrong-answer':
@@ -830,22 +826,19 @@ function sendAccountLinking(recipientId) {
 }
 
 function turnOnReview(userId) {
-  reviewOn = true;
   sendTextMessage(userId, 'Let\'s start review your cards!');
     var qs = {
         uid: userId
     };
     request.get(endpoint+'u', {qs: qs, json: true}, function (err, res, data) {
       console.log(data.length);
-      arrGlobalReviews.userId = data;
+      var user = UsersRepository.get(userId);
+      user.setQuestions(data);
+      user.turnOnReview();
 
-      for (var i=0; i < data.length; i++) {
-        console.log(i, data[i].translated);
-        arrAnswers[i] = data[i].translated;
-      }
-      if (!arrGlobalReviews.userId || arrGlobalReviews.userId.length<4) {
+      if (user.getAnswerList().length < 4) {
         sendTextMessage(userId, 'Not enough words for you to learn. Stop review words.');
-        turnOffReview(userId);
+        user.turnOffReview();
         return;
       }
 
@@ -854,58 +847,65 @@ function turnOnReview(userId) {
 }
 
 function turnOffReview(userId) {
-  reviewOn = false;
-  arrAnswers = [];
-  arrGlobalReviews.userId = [];
-  originalWord = '';
-  correctAnswer = '';
+  var user = UsersRepository.get(userId);
+  user.turnOffReview();
   sendTextMessage(userId, 'Review finished! Type a word to create your flashcard!');
 }
 
 function sendQuestion(userId) {
-  if (!arrGlobalReviews.userId || arrGlobalReviews.userId.length===0) {
-    sendTextMessage(userId, 'Finished review cards! Great job!');
+  var user = UsersRepository.get(userId);
+  var question = user.getAQuestionAndRemoveOutOfStack();
+
+  if (!question) {
     turnOffReview(userId);
     return;
   }
 
   sendTextMessage(userId, 'What is the correct translation of this word?');
   
-  var ourWord = arrGlobalReviews.userId[0];
-  originalWord = ourWord.word;
-  correctAnswer = ourWord.translated;
-  var chosen = [];
-  chosen.push(0);
-  var buttons = new Array(Math.min(3, arrAnswers.length));
-  
-  for (var i = 0; i<buttons.length; i++) {
-    do {
-      var next = Math.floor(Math.random()*(arrAnswers.length));
-    } while (chosen.indexOf(next) > -1);
-    console.log(chosen);
-    
-    chosen.push(next);
-    buttons[i] = {
-      type: "postback",
-      title: arrAnswers[next],
-      payload: "/wrong-answer"
-    };
+  var originalWord = question.word;
+  var correctAnswer = question.translated;
+  var arrAnswers = user.getAnswerList();
+  var buttons = [];
+  arrAnswers = _.shuffle(arrAnswers);
+
+  for(var i = 0; i < arrAnswers.length; i++)
+  {
+      if (arrAnswer[i] === question.word) {
+          continue;
+      };
+      buttons.push({
+        type: "postback",
+        title: arrAnswers[i],
+        payload: '/wrong-answer'
+      });
+      if( buttons.length === 3){
+          break;
+      }
   }
-  
-  buttons[Math.floor(Math.random()*(buttons.length))] = {
-    type: "postback",
-    title: correctAnswer,
-    payload: "/right-answer"
-  };
+
+  for(var i = 0; i < arrAnswers.length; i++)
+  {
+      if (arrAnswer[i] !== question.word) {
+          continue;
+      };
+      buttons.push({
+        type: "postback",
+        title: arrAnswers[i],
+        payload: '/right-answer'
+      });
+      break;
+  }
+
+  buttons = _.shuffle(buttons);
   
   console.log(buttons);
-  sendButtonMessage(userId, originalWord, JSON.stringify(buttons)); 
-
-  arrGlobalReviews.userId.splice(0,1);
+  sendButtonMessage(userId, originalWord, JSON.stringify(buttons));
 }
 
 function receivedRightAnswer(userId) {
-  translateAndSend(userId, originalWord);
+  var user = UsersRepository.get(userId);
+  translateAndSend(userId, user.originalWord);
   sendTextMessage(userId, 'Yes, that\'s correct! Great job!!');
   
   setTimeout( function() {
@@ -914,15 +914,16 @@ function receivedRightAnswer(userId) {
 
   var qs = {
       uid: userId,
-      q: originalWord,
+      q: user.originalWord,
       answer: 'right'
   };
   request.get(endpoint+'a', {qs:qs, json: true}, function (err, res, data){});
 }
 
 function receivedWrongAnswer(userId) {
+  var user = UsersRepository.get(userId);
   sendTextMessage(userId, 'Oh no... It is not correct. Let\'s see what the correct meaning of' + originalWord + 'is.');
-  translateAndSend(userId, originalWord);
+  translateAndSend(userId, user.originalWord);
 
   setTimeout( function() {
     sendQuestion(userId);
@@ -930,7 +931,7 @@ function receivedWrongAnswer(userId) {
   
   var qs = {
     uid: userId,
-    q: originalWord,
+    q: user.originalWord,
     answer: 'wrong'
   };
   request.get(endpoint+'a', {qs:qs, json: true}, function (err, res, data){});
